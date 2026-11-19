@@ -35,17 +35,19 @@ def seed(db, count=12000, seed=42):
     rng=random.Random(seed)
     start=datetime(2026,10,1)
     batch=[]
+    # Preserve the original demo with seed=42; other seeds vary defect positions.
+    offsets = [0, 0, 0, 0, 0] if seed == 42 else [rng.randrange(n) for n in (43, 59, 71, 83, 97)]
     for i in range(1,count+1):
         sensor=rng.randint(1,30)
         timestamp=(start+timedelta(minutes=i*3)).isoformat()
         value=round(rng.gauss(62,17),2)
         event=i
         # Intentional overlapping defects; category totals must not be summed.
-        if i%43==0: value=None
-        if i%59==0: value=145.0
-        if i%71==0: sensor=999
-        if i%83==0: event=i-1
-        if i%97==0: timestamp='2027-01-15T12:00:00'
+        if (i+offsets[0])%43==0: value=None
+        if (i+offsets[1])%59==0: value=145.0
+        if (i+offsets[2])%71==0: sensor=999
+        if (i+offsets[3])%83==0: event=i-1
+        if (i+offsets[4])%97==0: timestamp='2027-01-15T12:00:00'
         batch.append((i,event,sensor,timestamp,value))
     db.executemany('INSERT INTO readings VALUES (?,?,?,?,?)',batch)
     db.commit()

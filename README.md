@@ -8,6 +8,8 @@ An interactive **industrial telemetry data-quality system** built with **Python,
 - Generates **12,000 reproducible synthetic telemetry records** from 30 sensors at three plants
 - SQL-based checks for **nulls, out-of-range readings, unknown sensors, duplicate event IDs, and future timestamps**
 - Interactive dark-mode dashboard with **quality KPIs, rule breakdown, pass/fail donut, daily trend, plant comparison, and flagged-record explorer**
+- **Reset Demo Data** restores the original reproducible dataset; **Generate New Dataset** creates fresh synthetic readings and shifts defect locations, updating charts and KPIs
+- Per-visitor demo SQLite database to avoid one visitor overwriting another's dashboard
 - Filter and download flagged records as CSV
 - Export JSON quality report and flagged CSV from CLI
 - **10 automated tests** and GitHub Actions CI
@@ -64,7 +66,7 @@ python -m pytest -q
 - Unknown sensor IDs are intentionally retained to demonstrate referential-integrity checks; the schema does not enforce a foreign key on the raw ingestion table.
 - The 'future timestamp' cutoff is a **fixed demo reference date** (2026-11-19), not the computer's current clock.
 - Data is **synthetic**. No industrial data or real-time sensors are connected.
-- Regenerating the demo dataset resets the local database.
+- Reset Demo Data restores the seed-42 baseline; Generate New Dataset uses a random seed. Both replace the current visitor's demo database.
 
 ## Suggested CV entry
 **SignalGuard — Industrial Data Quality Monitoring | Python, SQL, SQLite, Streamlit, pytest**  

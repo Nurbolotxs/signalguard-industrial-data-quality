@@ -1,5 +1,8 @@
 # Interactive Streamlit dashboard for industrial sensor data quality.
 from pathlib import Path
+import secrets
+import tempfile
+import uuid
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -17,9 +20,9 @@ h1,h2,h3 {letter-spacing:-.025em}
 def get_db():
     # Use a writable temporary directory on Streamlit Community Cloud.
     # Local runs keep the database inside the project directory.
-    import os
-    import tempfile
-    path = Path(tempfile.gettempdir()) / 'signalguard' / 'telemetry.db'
+    if 'demo_session_id' not in st.session_state:
+        st.session_state.demo_session_id = uuid.uuid4().hex
+    path = Path(tempfile.gettempdir()) / 'signalguard' / f"{st.session_state.demo_session_id}.db"
     path.parent.mkdir(parents=True, exist_ok=True)
     db=connect(path)
     # If the user has run CLI, use the existing data without destroying it.
@@ -29,11 +32,13 @@ def get_db():
 
 # A button callback runs before the dashboard script on each interaction.
 # Use an independent SQLite connection and close it before Streamlit reruns.
-def regenerate_dataset():
+def regenerate_dataset(new_random=False):
     connection = get_db()
     try:
         initialize(connection)
-        seed(connection)
+        chosen_seed = secrets.randbelow(2**32) if new_random else 42
+        seed(connection, seed=chosen_seed)
+        st.session_state.dataset_seed = chosen_seed
     finally:
         connection.close()
 
@@ -47,7 +52,9 @@ with st.sidebar:
     st.header('Control center')
     st.success('● Monitoring ready')
     st.caption('Synthetic telemetry • 30 sensors • 3 plants')
-    st.button('Regenerate demo dataset', width='stretch', on_click=regenerate_dataset)
+    st.button('Reset Demo Data', width='stretch', on_click=regenerate_dataset, args=(False,))
+    st.button('Generate New Dataset', width='stretch', on_click=regenerate_dataset, args=(True,))
+    st.caption('Reset restores the original dataset. Generate creates new sensor values and a new quality report.')
     st.divider()
     st.markdown('**Validation rules**')
     st.caption('Missing reading · Out-of-range · Unknown sensor · Duplicate event · Future timestamp')
@@ -59,6 +66,7 @@ a.metric('Records inspected',f"{r['total']:,}")
 b.metric('Valid readings',f"{r['valid']:,}")
 c.metric('Flagged readings',f"{r['invalid']:,}")
 d.metric('Quality score',f"{r['score']:.2f}%")
+st.caption(f"Dataset seed: {st.session_state.get('dataset_seed', 42)}")
 st.caption('A reading may violate multiple rules. Invalid readings are counted once in the headline metric.')
 left,right=st.columns([1.15,1])
 with left:

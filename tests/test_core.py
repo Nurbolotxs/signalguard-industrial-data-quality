@@ -48,3 +48,20 @@ def test_csv_export(tmp_path):
     db=make_db(100)
     path=tmp_path/'flagged.csv';export_flagged_csv(db,path)
     assert path.exists() and len(path.read_text().splitlines())>1
+
+
+def test_new_seed_changes_dataset():
+    a=sqlite3.connect(':memory:');a.row_factory=sqlite3.Row
+    b=sqlite3.connect(':memory:');b.row_factory=sqlite3.Row
+    initialize(a);initialize(b)
+    seed(a,1000,seed=42);seed(b,1000,seed=12345)
+    assert a.execute('SELECT reading FROM readings WHERE row_id=1').fetchone()[0] != b.execute('SELECT reading FROM readings WHERE row_id=1').fetchone()[0]
+    assert quality_results(a)['total']==quality_results(b)['total']==1000
+
+
+def test_new_seed_is_reproducible():
+    a=sqlite3.connect(':memory:');a.row_factory=sqlite3.Row
+    b=sqlite3.connect(':memory:');b.row_factory=sqlite3.Row
+    initialize(a);initialize(b)
+    seed(a,1000,seed=12345);seed(b,1000,seed=12345)
+    assert quality_results(a)==quality_results(b)

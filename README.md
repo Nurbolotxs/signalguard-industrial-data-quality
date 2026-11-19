@@ -1,5 +1,7 @@
 # 📡 SignalGuard — Industrial Data Quality Monitoring
 
+**[🌐 Live Demo](https://signalguard-industrial-data-quality-hpntnxymspxyeefpxmdchq.streamlit.app/)** · **[GitHub Repository](https://github.com/Nurbolotxs/signalguard-industrial-data-quality)**
+
 An interactive **industrial telemetry data-quality system** built with **Python, SQL, SQLite, Streamlit, Plotly, and pytest**. Designed as a portfolio project for Data Quality / Data Engineering internships.
 
 ## Features
